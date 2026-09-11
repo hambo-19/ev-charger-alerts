@@ -19,11 +19,11 @@ from datetime import datetime, timezone
 STATION_ID = 5544921  # FLORIDA TECH / CHARGER 3, 2600 Country Club Rd
 STATION_LABEL = "Florida Tech \u2014 Charger 3"
 
-# Change this to your own secret topic name (must match what you
-# subscribe to in the ntfy app). Treat it like a password.
+# ntfy topic — this is the "password": anyone who knows it can subscribe
+# to alerts and can also publish to the topic. Keep it unguessable.
 # Note: `or` (not a default arg) so an empty NTFY_TOPIC env var also
 # falls back to the built-in topic.
-NTFY_TOPIC = os.environ.get("NTFY_TOPIC") or "fit-charger3-8k2m4q9x"
+NTFY_TOPIC = os.environ.get("NTFY_TOPIC") or "fit-charger3-alerts-x7k2"
 NTFY_URL = f"https://ntfy.sh/{NTFY_TOPIC}"
 
 # Tight bounding box around the station (keeps responses tiny).
