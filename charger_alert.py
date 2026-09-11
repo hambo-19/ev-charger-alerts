@@ -21,7 +21,9 @@ STATION_LABEL = "Florida Tech \u2014 Charger 3"
 
 # Change this to your own secret topic name (must match what you
 # subscribe to in the ntfy app). Treat it like a password.
-NTFY_TOPIC = os.environ.get("NTFY_TOPIC", "fit-charger3-8k2m4q9x")
+# Note: `or` (not a default arg) so an empty NTFY_TOPIC env var also
+# falls back to the built-in topic.
+NTFY_TOPIC = os.environ.get("NTFY_TOPIC") or "fit-charger3-8k2m4q9x"
 NTFY_URL = f"https://ntfy.sh/{NTFY_TOPIC}"
 
 # Tight bounding box around the station (keeps responses tiny).
