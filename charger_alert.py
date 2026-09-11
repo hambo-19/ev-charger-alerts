@@ -125,7 +125,7 @@ def main() -> int:
         notify(
             "Charger full again",
             f"All ports are now in use at {STATION_LABEL}.",
-            priority="low",
+            priority="default",
             tags="no_entry",
         )
 
