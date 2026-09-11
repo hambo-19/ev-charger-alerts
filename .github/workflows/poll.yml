@@ -5,9 +5,6 @@ on:
     - cron: "*/5 * * * *"
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 concurrency:
   group: charger-poll
   cancel-in-progress: false
@@ -15,6 +12,8 @@ concurrency:
 jobs:
   poll:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -22,20 +21,33 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Restore previous state
+        uses: actions/cache/restore@v4
+        with:
+          path: state.json
+          key: charger-state-${{ github.run_id }}
+          restore-keys: charger-state-
+
       - name: Run availability check
         env:
           NTFY_TOPIC: ${{ vars.NTFY_TOPIC }}
         run: python charger_alert.py
 
-      - name: Monthly keep-alive marker
-        run: date -u +%Y-%m > keepalive.txt
+      - name: Save state
+        uses: actions/cache/save@v4
+        with:
+          path: state.json
+          key: charger-state-${{ github.run_id }}
 
-      - name: Commit state if changed
+      - name: Monthly keep-alive commit
+        continue-on-error: true
         run: |
           git config user.name "charger-alert-bot"
           git config user.email "charger-alert-bot@users.noreply.github.com"
-          git add state.json keepalive.txt
+          date -u +%Y-%m > keepalive.txt
+          git add keepalive.txt
           if ! git diff --cached --quiet; then
-            git commit -m "chore: update state"
+            git commit -m "chore: monthly keep-alive"
+            git pull --rebase origin main
             git push
           fi
