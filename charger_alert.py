@@ -6,7 +6,7 @@ Melbourne, FL) and sends an ntfy.sh push notification when a port opens up.
 
 - Uses only the Python standard library (no pip installs needed).
 - Data source: ChargePoint's public map feed (same live data as their app).
-- State is kept in state.json (committed back to the repo by the workflow)
+- State is kept in state.json (persisted via Actions cache by the workflow)
   so alerts fire only on transitions, not on every poll.
 """
 
@@ -80,11 +80,13 @@ def save_state(state: dict) -> None:
 
 
 def notify(title: str, message: str, priority: str, tags: str) -> None:
+    # HTTP headers must be latin-1 — keep emoji out of the Title header.
+    safe_title = title.encode("latin-1", "replace").decode("latin-1")
     req = urllib.request.Request(
         NTFY_URL,
         data=message.encode("utf-8"),
         headers={
-            "Title": title,
+            "Title": safe_title,
             "Priority": priority,
             "Tags": tags,
         },
@@ -111,8 +113,8 @@ def main() -> int:
 
     if prev is not None and available > 0 and prev == 0:
         notify(
-            f"Charger spot open! \U0001f50c",
-            f"{available}/{total} port(s) now available at {STATION_LABEL} "
+            "Charger spot open!",
+            f"\U0001f50c {available}/{total} port(s) now available at {STATION_LABEL} "
             f"(2600 Country Club Rd).",
             priority="high",
             tags="electric_plug,car",
